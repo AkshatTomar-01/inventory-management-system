@@ -121,14 +121,15 @@ class OrderService:
         return order
 
     def get_monthly_stats(self, db: Session) -> list[dict]:
+        month_expr = func.date_trunc("month", Order.created_at)
         results = (
             db.query(
-                func.date_trunc("month", Order.created_at).label("month"),
+                month_expr.label("month"),
                 func.count(Order.id).label("count"),
                 func.sum(Order.total_amount).label("revenue"),
             )
-            .group_by(func.date_trunc("month", Order.created_at))
-            .order_by(func.date_trunc("month", Order.created_at))
+            .group_by(month_expr)
+            .order_by(month_expr)
             .limit(12)
             .all()
         )
