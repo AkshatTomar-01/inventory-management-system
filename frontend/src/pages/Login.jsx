@@ -10,7 +10,7 @@ import { getErrorMessage } from '@/lib/utils'
 import api from '@/lib/api'
 
 export default function Login() {
-  const [tab, setTab] = useState('login') // 'login' | 'register'
+  const [tab, setTab] = useState('login')
   const [form, setForm] = useState({ username: '', email: '', password: '', role: 'manager' })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -44,7 +44,7 @@ export default function Login() {
         password: form.password,
         role: form.role,
       })
-      setSuccess('Account created! Ab login karo.')
+      setSuccess('Account created! Please sign in.')
       setTab('login')
       setForm({ username: form.username, email: '', password: '', role: 'manager' })
     } catch (err) {
@@ -59,7 +59,6 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
           <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
             <BarChart3 className="w-5 h-5 text-primary-foreground" />
@@ -71,7 +70,6 @@ export default function Login() {
         </div>
 
         <Card>
-          {/* Tabs */}
           <div className="flex border-b">
             <button
               onClick={() => { setTab('login'); setError(''); setSuccess('') }}
@@ -96,7 +94,6 @@ export default function Login() {
           </div>
 
           <CardContent className="pt-6">
-            {/* LOGIN FORM */}
             {tab === 'login' && (
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-1.5">
@@ -132,7 +129,6 @@ export default function Login() {
               </form>
             )}
 
-            {/* REGISTER FORM */}
             {tab === 'register' && (
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="space-y-1.5">

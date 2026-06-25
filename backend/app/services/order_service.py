@@ -13,12 +13,10 @@ import math
 
 class OrderService:
     def create(self, db: Session, payload: OrderCreate) -> Order:
-        # Validate customer
         customer = db.query(Customer).filter(Customer.id == payload.customer_id, Customer.is_deleted == False).first()
         if not customer:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"success": False, "message": "Customer not found"})
 
-        # Validate products and stock in a single pass
         product_map = {}
         for item in payload.items:
             if item.product_id in product_map:
@@ -31,7 +29,6 @@ class OrderService:
                 )
             product_map[item.product_id] = product
 
-        # Check inventory for all items (aggregate duplicate product_ids)
         quantity_needed: dict[UUID, int] = {}
         for item in payload.items:
             quantity_needed[item.product_id] = quantity_needed.get(item.product_id, 0) + item.quantity
@@ -44,7 +41,6 @@ class OrderService:
                     detail={"success": False, "message": f"Insufficient stock for '{product.name}'. Available: {product.quantity_in_stock}, Requested: {qty}"},
                 )
 
-        # Create order
         order = Order(customer_id=payload.customer_id, status=OrderStatus.PENDING, total_amount=Decimal("0"))
         db.add(order)
         db.flush()
@@ -63,7 +59,7 @@ class OrderService:
             )
             db.add(order_item)
             product.quantity_in_stock -= quantity_needed.get(item.product_id, 0)
-            quantity_needed[item.product_id] = 0  # avoid double deduction for duplicate entries
+            quantity_needed[item.product_id] = 0
 
         order.total_amount = total
         db.commit()
@@ -99,7 +95,6 @@ class OrderService:
         if not order:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"success": False, "message": "Order not found"})
         if order.status != OrderStatus.CANCELLED:
-            # Restore stock
             for item in order.items:
                 product = db.query(Product).filter(Product.id == item.product_id).with_for_update().first()
                 if product:

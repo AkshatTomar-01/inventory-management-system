@@ -18,11 +18,17 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only redirect on 401 if user was already logged in (has token)
+    // Don't redirect on login/register pages
+    const isAuthRoute = error.config?.url?.includes('/auth/login') ||
+                        error.config?.url?.includes('/auth/register')
+
+    if (error.response?.status === 401 && !isAuthRoute) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       window.location.href = '/login'
     }
+
     return Promise.reject(error)
   }
 )
